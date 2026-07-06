@@ -4,23 +4,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kota - Application de Billetage</title>
+    <title>Kotaa - Application de Billetage</title>
 
     <!-- Vue 3 -->
-    <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- jsPDF -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Bootstrap Icons -->
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- <link rel="stylesheet" href="assets/css/style.css"> -->
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
 
-    <h1>Test</h1>
+    <div id="app" class="container">
+        <header>
+            <h1><i class="bi bi-wallet2"></i> Kotaa</h1>
+            <button class="theme-toggle" @click="toggleTheme"
+                :title="isDark ? 'Passer au mode clair' : 'Passer au mode sombre'">
+                <i :class="isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill'"></i>
+            </button>
+        </header>
 
-    <!-- <script src="assets/js/app.js"></script> -->
+        <div class="tabs">
+            <button class="tab-btn" :class="{ active: activeTab === 'new' }" @click="activeTab = 'new'">
+                <i class="bi bi-plus-circle"></i> Nouveau Comptage
+            </button>
+            <button class="tab-btn" :class="{ active: activeTab === 'history' }" @click="activeTab = 'history'">
+                <i class="bi bi-clock-history"></i> Historique
+            </button>
+        </div>
+
+        <!-- NOUVEAU COMPTAGE -->
+        <div v-show="activeTab === 'new'">
+            <div class="card">
+                <div class="form-group">
+                    <label>Nom du Validateur / Caissier :</label>
+                    <input type="text" v-model="validatorName" class="form-control" placeholder="Entrez le nom...">
+                </div>
+                <div class="form-group">
+                    <label>Date du comptage :</label>
+                    <input type="date" v-model="validationDate" class="form-control">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Détail des coupures (FBU)</h3>
+                <div class="denomination-row" v-for="den in denominations" :key="den">
+                    <div><strong>{{ formatNumber(den) }} FBU</strong></div>
+                    <div>
+                        <input type="number" v-model.number="counts[den]" min="0" class="form-control"
+                            placeholder="Quantité">
+                    </div>
+                    <div style="text-align: right;">
+                        {{ formatCurrency(getSubtotal(den)) }}
+                    </div>
+                </div>
+
+                <div class="total-box">
+                    Total : {{ formatCurrency(grandTotal) }}
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" @click="saveCount" :disabled="!isValid">
+                        <i class="bi bi-save"></i> Enregistrer
+                    </button>
+                    <button class="btn btn-success" @click="exportPDF(currentData)" :disabled="grandTotal === 0">
+                        <i class="bi bi-file-earmark-pdf"></i> Exporter PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORIQUE -->
+        <div v-show="activeTab === 'history'">
+            <div class="card">
+                <h3>Historique des comptages</h3>
+                <div v-if="history.length === 0" style="text-align: center; color: gray; padding: 20px;">
+                    Aucun historique disponible.
+                </div>
+                <div v-else class="history-item" v-for="(item, index) in history" :key="item.id">
+                    <div class="history-info">
+                        <strong>{{ formatCurrency(item.total) }}</strong>
+                        <span><i class="bi bi-person"></i> {{ item.name }} | <i class="bi bi-calendar"></i> {{
+                            formatDateFR(item.date) }}</span>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn btn-success" @click="exportPDF(item)" title="Exporter en PDF">
+                            <i class="bi bi-file-pdf"></i>
+                        </button>
+                        <button class="btn btn-primary" @click="loadHistoryItem(item)" title="Consulter">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-danger" @click="deleteHistoryItem(index)" title="Supprimer">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
 </body>
 
 </html>
