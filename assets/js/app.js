@@ -5,8 +5,8 @@ createApp({
         return {
             isDark: false,
             activeTab: 'new',
-            denominations: [10000, 5000, 2000, 1000, 500],
-            counts: { 10000: 0, 5000: 0, 2000: 0, 1000: 0, 500: 0 },
+            denominations: [10000, 5000, 2000, 1000, 500, 100],
+            counts: { 10000: 0, 5000: 0, 2000: 0, 1000: 0, 500: 0, 100: 0 },
             validatorName: '',
             validationDate: new Date().toISOString().split('T')[0],
             history: []
@@ -33,7 +33,7 @@ createApp({
         toggleTheme() {
             this.isDark = !this.isDark;
             document.documentElement.setAttribute('data-theme', this.isDark ? 'dark' : 'light');
-            localStorage.setItem('kota_theme', this.isDark ? 'dark' : 'light');
+            localStorage.setItem('kotaa_theme', this.isDark ? 'dark' : 'light');
         },
         getSubtotal(denomination) {
             const qty = parseInt(this.counts[denomination]) || 0;
@@ -41,7 +41,6 @@ createApp({
         },
         formatNumber(num) {
             if (num === null || num === undefined) return '0';
-            // Séparation explicite par un espace standard
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         },
         formatCurrency(num) {
@@ -82,10 +81,10 @@ createApp({
             }
         },
         saveHistory() {
-            localStorage.setItem('kota_history', JSON.stringify(this.history));
+            localStorage.setItem('kotaa_history', JSON.stringify(this.history));
         },
         loadHistory() {
-            const saved = localStorage.getItem('kota_history');
+            const saved = localStorage.getItem('kotaa_history');
             if (saved) {
                 try {
                     this.history = JSON.parse(saved);
@@ -98,7 +97,7 @@ createApp({
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            const primaryColor = [13, 110, 253]; // Bleu Kota
+            const primaryColor = [13, 110, 253];
             const textColor = [33, 37, 41];
             const lightGray = [245, 247, 250];
 
@@ -109,7 +108,7 @@ createApp({
             doc.setTextColor(255, 255, 255);
             doc.setFont("helvetica", "bold");
             doc.setFontSize(22);
-            doc.text("KOTA - RAPPORT DE COMPTAGE", 105, 18, { align: "center" });
+            doc.text("KOTAA - RAPPORT DE COMPTAGE", 105, 18, { align: "center" });
 
             doc.setFontSize(11);
             doc.setFont("helvetica", "normal");
@@ -214,13 +213,13 @@ createApp({
             doc.line(135, y + 22, 195, y + 22);
 
             // Sauvegarde automatique du fichier
-            const fileName = `Kota_Billetage_${dataObj.name.replace(/\s+/g, '_')}_${dataObj.date}.pdf`;
+            const fileName = `Kotaa_Billetage_${dataObj.name.replace(/\s+/g, '_')}_${dataObj.date}.pdf`;
             doc.save(fileName);
         }
     },
     mounted() {
         // Charger le thème
-        const savedTheme = localStorage.getItem('kota_theme');
+        const savedTheme = localStorage.getItem('kotaa_theme');
         if (savedTheme === 'dark') {
             this.isDark = true;
             document.documentElement.setAttribute('data-theme', 'dark');
